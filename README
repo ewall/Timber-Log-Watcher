@@ -1,0 +1,22 @@
+Timber Log Watcher v1.0 by ewall 2009-03-17
+(c)2009 Eric W. Wallace/Atlantic Fund Administation
+
+Description: Tails a log file and sends alert emails when the watched terms are seen.
+
+Usage: Configure Timber.ini with the global options and words you want to watch for.
+
+-----
+
+Using Timber as a Windows service:
+
+1) Create folder "C:\Timber" and copy in all the executables
+
+2) Config your INI file at "C:\Timber\Timber.ini"
+
+3) Run the following command to install the service: instsrv Timber C:\Timber\SRVANY.EXE
+
+4) Configure in the Registry at HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Timber
+	OR
+   Double-click the file "service_config.reg" to install parameters
+
+5) Configure startup options etc. with the Services Manager
