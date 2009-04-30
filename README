@@ -5,18 +5,26 @@ Description: Tails a log file and sends alert emails when the watched terms are 
 
 Usage: Configure Timber.ini with the global options and words you want to watch for.
 
+Requires: Python 2.x
+
+Platforms: Should work on any platform with a Python interpretter, but my intention
+was to use it as a Windows service.
+
 -----
 
 Using Timber as a Windows service:
 
-1) Create folder "C:\Timber" and copy in all the executables
+1) First you need to create the executable, for which you can use the 'setup.cmd'
+script (Py2EXE is required for this). Files will be in the .\dist folder.
 
-2) Config your INI file at "C:\Timber\Timber.ini"
+2) Create folder "C:\Timber" and copy in all the executables
 
-3) Run the following command to install the service: instsrv Timber C:\Timber\SRVANY.EXE
+3) Config your INI file at "C:\Timber\Timber.ini"
 
-4) Configure in the Registry at HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Timber
+4) Run the following command to install the service: instsrv Timber C:\Timber\SRVANY.EXE
+
+5) Configure in the Registry at HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Timber
 	OR
    Double-click the file "service_config.reg" to install parameters
 
-5) Configure startup options etc. with the Services Manager
+6) Configure startup options etc. with the Services Manager
