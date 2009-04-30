@@ -8,8 +8,8 @@ Usage: Configure Timber.ini with the global options and words you want to watch 
 """
 
 __author__ = "Eric W. Wallace <e@ewall.org>"
-__version__ = "$Revision: 1.0.0.0 $"
-__date__ = "$Date: 2009/04/23 $"
+__version__ = "$Revision: 1.0 $"
+__date__ = "$Date: 2009/03/17 $"
 __copyright__ = "Copyright (c)2009 Eric W. Wallace & Atlantic Fund Administration"
 __license__ = "Creative Commons Attribution-ShareAlike (http://creativecommons.org/licenses/by-sa/3.0/)"
 

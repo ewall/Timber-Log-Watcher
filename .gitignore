@@ -1,5 +1,4 @@
-build/*
-dist/*
-scrap/*
-winstaller/*
-Timber.ini
+build/
+dist/
+scrap/
+winstaller/

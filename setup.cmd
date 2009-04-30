@@ -8,7 +8,7 @@ python setup.py py2exe
 
 IF EXIST C:\PROGRA~1\7-Zip\7z.exe (
     ECHO Creating ZIP file of the installation folder...
-    IF EXIST README.txt COPY README.txt dist\
+    IF EXIST README COPY README dist\README.txt
     IF EXIST include\. COPY include\* dist\
     CD dist
     IF NOT EXIST ..\winstaller\. MKDIR ..\winstaller
