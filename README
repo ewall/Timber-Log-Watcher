@@ -1,4 +1,4 @@
-Timber Log Watcher v1.0 by ewall 2009-03-17
+Timber Log Watcher v1.0.1 by ewall 2009-05-07
 (c)2009 Eric W. Wallace/Atlantic Fund Administation
 
 Description: Tails a log file and sends alert emails when the watched terms are seen.
@@ -28,3 +28,10 @@ script (Py2EXE is required for this). Files will be in the .\dist folder.
    Double-click the file "service_config.reg" to install parameters
 
 6) Configure startup options etc. with the Services Manager
+
+-----
+
+TO DO:
+
+Make a resilience option which allows the program to wait for the target file to be ready.
+(Currently, it just quits if not found.)
