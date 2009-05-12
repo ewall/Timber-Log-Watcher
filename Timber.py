@@ -1,5 +1,5 @@
 """
-Timber Log Watcher v1.0.1 by ewall 2009-05-07
+Timber Log Watcher v1.0.2 by ewall 2009-05-12
 (c)2009 Eric W. Wallace/Atlantic Fund Administation
 
 Description: Tails a log file and sends alert emails when the watched terms are seen.
@@ -22,19 +22,10 @@ import time, re
 
 ### Constants
 VERBOSE = True
+SLEEPSECONDS = 10 #how long to wait for new writes to the target file
+WAITSECONDS = 300 #how long to wait before retrying the file load
+MAXWAIT = 21600 # = 6 hrs
 configFileName = 'Timber.ini'
-
-stringSubstitutions = dict({
-	'YEAR'        : datetime.now().strftime('%Y'),
-	'YEARSHORT'   : datetime.now().strftime('%y'),
-	'MONTH'       : datetime.now().strftime('%m') if datetime.now().strftime('%m')[:1] != '0' else datetime.now().strftime('%m')[1:],
-	'MONTHPAD'    : datetime.now().strftime('%m'),
-	'MONTHABBREV' : datetime.now().strftime('%b'),
-	'MONTHNAME'   : datetime.now().strftime('%B'),
-	'DAY'         : datetime.now().strftime('%d') if datetime.now().strftime('%d')[:1] != '0' else datetime.now().strftime('%d')[1:],
-	'DAYPAD'      : datetime.now().strftime('%d'),
-	'DAYABREV'    : datetime.now().strftime('%a'),
-	'DAYNAME'     : datetime.now().strftime('%A') })
 
 ### Functions
 
@@ -59,6 +50,57 @@ def sendmail(hostname=None, sender='', to='', subject='', text=''):
 	else:
 		if VERBOSE: print "Email sent."
 
+def getFilename(configParser):
+	""" fetches target filename from config and performs date substitutions """
+	#we want these to be "fresh" every time the function is run
+	stringSubstitutions = dict({
+		'YEAR'        : datetime.now().strftime('%Y'),
+		'YEARSHORT'   : datetime.now().strftime('%y'),
+		'MONTH'       : datetime.now().strftime('%m') if datetime.now().strftime('%m')[:1] != '0' else datetime.now().strftime('%m')[1:],
+		'MONTHPAD'    : datetime.now().strftime('%m'),
+		'MONTHABBREV' : datetime.now().strftime('%b'),
+		'MONTHNAME'   : datetime.now().strftime('%B'),
+		'DAY'         : datetime.now().strftime('%d') if datetime.now().strftime('%d')[:1] != '0' else datetime.now().strftime('%d')[1:],
+		'DAYPAD'      : datetime.now().strftime('%d'),
+		'DAYABREV'    : datetime.now().strftime('%a'),
+		'DAYNAME'     : datetime.now().strftime('%A') })
+	myFilename = configParser.get('options', 'filename')
+	t = Template(myFilename)
+	return t.safe_substitute(stringSubstitutions)
+
+def getFileHandle(filename):
+	""" get file handle, returns None when it's not there """
+	try:
+		myFile = open(filename, "rb")
+	except IOError:
+		return None
+	return myFile
+
+def getWatchFile():
+	""" loads global file handle, waits or fails as appropriate """
+	global watchFile, where #yeah, yeah, I know this is bad form!
+	watchFile = getFileHandle(FILENAME)
+	if WAITFORFILE == True:
+		waited = 0
+		while watchFile == None:
+			if waited >= MAXWAIT:
+				#too many retries, notify and quit
+				subject = "Timber Log Watcher exiting"
+				message = "Target file not found; maximum wait period reached. Program is exiting."
+				sendmail(MAILSERVER, FROMEMAIL, REPORTEMAIL, subject, message)
+				print "\nERROR: reached maximum limit while waiting for file.\n"
+				sys.exit(2)
+			if VERBOSE: print "File not ready; sleeping..."
+			time.sleep(WAITSECONDS)
+			waited += WAITSECONDS
+			watchFile = getFileHandle(FILENAME)
+	else:
+		if watchFile == None:
+			#die if we aren't supposed to wait and the file is not there
+			print "\nERROR: can't open '" + FILENAME + "'!\n"
+			sys.exit(2)
+        where = 0 #reset cursor to head of file
+
 ### Main
 if __name__ == '__main__':
 
@@ -69,33 +111,28 @@ if __name__ == '__main__':
 	# Read global options from config file
 	config = ConfigParser.RawConfigParser()
 	config.read(configFileName)
+	FILENAME = getFilename(config)
+	wait = config.get('options', 'waitforfile')
+	if wait == "1" or wait.lower() == "true":
+                WAITFORFILE = True
+        else:
+                WAITFORFILE = False
 	MAILSERVER = config.get('options', 'mailserver')
 	FROMEMAIL = config.get('options', 'fromemail')
 	REPORTEMAIL = config.get('options', 'reportemail')
 	MESSAGES = dict(config.items("messages")) #keyword pairs for error levels and messages to send
 	WATCHES = dict(config.items("watches")) #keyword pairs for terms to watch and error levels
 
-	# Date substitutions in FILENAME
-	FILENAME = config.get('options', 'filename')
-	t = Template(FILENAME)
-	FILENAME = t.safe_substitute(stringSubstitutions)
-
 	# Double-check options
-	if not (os.path.exists(FILENAME)):
-		print "\nERROR: file '" + FILENAME + "' not found!\n"
-		sys.exit(2)
 	if MESSAGES=={} or WATCHES=={}:
 		print "\nERROR: config file '" + configFileName + "' is incomplete!\n"
 		sys.exit(3)
 
-	# Open the logfile
-	try:
-		watchFile = open(FILENAME, "rb")
-	except IOError:
-		print "\nERROR: can't open '" + FILENAME + "'!\n"
-		sys.exit(2)
+	# Variable prep
+	lastDate = datetime.now().strftime('%d')
+	getWatchFile() #loads watchFile handle
 
-	# Loop forever unless the user types Ctrl-c
+	# Loop forever (unless the user types Ctrl-c)
 	while True:
 		try:
 			where = watchFile.tell()
@@ -103,7 +140,13 @@ if __name__ == '__main__':
 
 			# nothing new, so wait a bit
 			if not line:
-				time.sleep(5)
+				time.sleep(SLEEPSECONDS)
+
+				if lastDate != datetime.now().strftime('%d'):
+					if VERBOSE: print "Date has changed, reloading target file."
+					getWatchFile()
+				lastDate = datetime.now().strftime('%d')
+				
 				watchFile.seek(where)
 			# now the interesting stuff happens
 			else:
@@ -121,7 +164,7 @@ if __name__ == '__main__':
 	
 					# send the alert if we found one                
 					if found:
-						if VERBOSE: logFile.write("Log watcher found the term '" + found.group() + "'\n")
+						if VERBOSE: print "Log watcher found the term '" + found.group() + "'."
 
 						errorLevel = WATCHES[watchFor]
 						subject = MESSAGES[errorLevel]
@@ -145,14 +188,13 @@ if __name__ == '__main__':
 						sendmail(MAILSERVER, FROMEMAIL, REPORTEMAIL, subject, message)
 
 		except IOError:
-			#TODO - sleep and re-try the file load
-			print "\nERROR: can't open '" + FILENAME + "'!\n"
+			print "\nERROR: IOError while processing, exiting now.\n"
 			logFile.close()
 			watchFile.close()
 			sys.exit(2)
 	
 		except KeyboardInterrupt:
-			logFile.write("User stopped program with CTRL-c, exiting now")
+			print "\nUser stopped program with CTRL-c, exiting now.\n"
 			logFile.close()
 			watchFile.close()
 			sys.exit(0)

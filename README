@@ -1,14 +1,31 @@
-Timber Log Watcher v1.0.1 by ewall 2009-05-07
+Timber Log Watcher v1.0.2 by ewall 2009-05-12
 (c)2009 Eric W. Wallace/Atlantic Fund Administation
 
-Description: Tails a log file and sends alert emails when the watched terms are seen.
+Description:
+  Tails a log file and sends alert emails when the watched terms are seen.
 
-Usage: Configure Timber.ini with the global options and words you want to watch for.
+Usage:
+  Configure Timber.ini with the global options and words you want to watch for.
 
-Requires: Python 2.x
+Requires:
+  Python 2.5
 
-Platforms: Should work on any platform with a Python interpretter, but my intention
-was to use it as a Windows service.
+Platforms:
+  Should work on any platform with a Python interpretter.
+  (My intention is to use it as a Windows service.)
+
+
+Version History:
+  1.0.2 = added "waitforfile" option and midnight reload
+  1.0.1 = added reporting of the following lines from the log
+  1.0.0 = simple working code
+
+-----
+
+Building on Windows:
+
+  Requires Py2Exe (http://www.py2exe.org/); 7-zip (http://www.7-zip.org/) is optional.
+  CD into the source code directory and run "setup.cmd".
 
 -----
 
@@ -29,9 +46,3 @@ script (Py2EXE is required for this). Files will be in the .\dist folder.
 
 6) Configure startup options etc. with the Services Manager
 
------
-
-TO DO:
-
-Make a resilience option which allows the program to wait for the target file to be ready.
-(Currently, it just quits if not found.)
