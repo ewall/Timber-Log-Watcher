@@ -1,4 +1,4 @@
-Timber Log Watcher v1.0.2 by ewall 2009-05-12
+Timber Log Watcher v1.0.3 by ewall 2009-05-13
 (c)2009 Eric W. Wallace/Atlantic Fund Administation
 
 Description:
@@ -12,11 +12,11 @@ Requires:
 
 Platforms:
   Should work on any platform with a Python interpretter.
-  (My intention is to use it as a Windows service.)
-
+  (My intention is to use it as a Windows service, so I have only tested it there.)
 
 Version History:
-  1.0.2 = added "waitforfile" option and midnight reload
+  1.0.3 = fix for "midnight reload", and test to see if it's necessary
+  1.0.2 = added "waitforfile" option and rudimentary "midnight reload" functionality
   1.0.1 = added reporting of the following lines from the log
   1.0.0 = simple working code
 
@@ -44,5 +44,5 @@ script (Py2EXE is required for this). Files will be in the .\dist folder.
 	OR
    Double-click the file "service_config.reg" to install parameters
 
-6) Configure startup options etc. with the Services Manager
+6) Configure startup options and such with the Services Manager
 
