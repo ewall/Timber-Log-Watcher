@@ -1,4 +1,6 @@
-build/
-dist/
-scrap/
-winstaller/
+build/*
+dist/*
+scrap/*
+winstaller/*
+timbertest.txt
+Timber.log
