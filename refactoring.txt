@@ -1,0 +1,26 @@
+Proposed refactoring of Timber Log Watcher:
+	
+	New feature: option of de-duplication for similar events
+		supported by new event queue
+	
+	Two threads:
+		
+		1.) read from file using generator syntax, push findings to queue
+			- how will this handle midnight reset and file-not-found?
+			
+		2.) process notifications popped from queue
+			- implement options for showing chunk of recent logs (e.g. x-lines vs. to next space)
+			- can add options for notification frequency
+			
+Reference:
+	on multi-threading:
+		http://www.tutorialspoint.com/python/python_multithreading.htm
+		http://www.informit.com/articles/article.aspx?p=30708&seqNum=3
+		
+	on generators for file tailing:
+		http://www.dabeaz.com/generators/
+		http://www.dabeaz.com/coroutines/
+	
+	on de-duping queue:
+		http://code.activestate.com/recipes/523034/
+		http://en.wikipedia.org/wiki/Category:String_similarity_measures
